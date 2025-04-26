@@ -8,6 +8,6 @@ const cuenta = require('../controllers/cuenta.controller.js');
 router.post('/api/cliente/create', cliente.createCliente);
 
 //rutas de las cuentas
-router.post('api/cuenta/create', cuenta.crearCuenta);
+router.post('/api/cuenta/create', cuenta.crearCuenta);
 
 module.exports = router;
