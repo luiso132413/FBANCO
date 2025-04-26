@@ -31,11 +31,11 @@ db.sequelize = sequelize;
 // Importar modelos
 db.Cliente = require('../models/cliente.model.js')(sequelize, Sequelize);
 
-// Establecer relaciones
+/* Establecer relaciones
 db.Customer.hasMany(db.Account, { foreignKey: 'customer_id' });
 db.Account.belongsTo(db.Customer, { foreignKey: 'customer_id' });
 
 db.Account.hasMany(db.Transaction, { foreignKey: 'account_id' });
-db.Transaction.belongsTo(db.Account, { foreignKey: 'account_id' });
+db.Transaction.belongsTo(db.Account, { foreignKey: 'account_id' });*/
 
 module.exports = db;
