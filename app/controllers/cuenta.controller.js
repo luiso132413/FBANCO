@@ -80,3 +80,96 @@ exports.crearCuenta = async (req, res) => {
         });
     }
 };
+
+exports.suspenderCuenta = async (req, res) => {
+    try {
+        const { numero_cuenta } = req.params;
+
+        // Validar que se proporcionó el número de cuenta
+        if (!numero_cuenta) {
+            return res.status(400).json({
+                success: false,
+                message: 'El número de cuenta es requerido'
+            });
+        }
+
+        // Buscar la cuenta
+        const cuenta = await Cuenta.findOne({
+            where: { numero_cuenta }
+        });
+
+        if (!cuenta) {
+            return res.status(404).json({
+                success: false,
+                message: 'Cuenta no encontrada'
+            });
+        }
+
+        // Verificar si la cuenta ya está suspendida
+        if (cuenta.estado === 'Suspendida') {
+            return res.status(400).json({
+                success: false,
+                message: 'La cuenta ya está suspendida'
+            });
+        }
+
+        // Actualizar el estado de la cuenta
+        await cuenta.update({ estado: 'Suspendida' });
+
+        return res.status(200).json({
+            success: true,
+            message: 'Cuenta suspendida exitosamente',
+            data: cuenta
+        });
+    } catch (error) {
+        console.error('Error al suspender la cuenta: ', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Ocurrió un error'
+        });
+    }
+};
+
+exports.obtenerDetalleCuenta = async (req, res) => {
+    try {
+        const { numero_cuenta } = req.params;
+
+        // Validar que se proporcionó el número de cuenta
+        if (!numero_cuenta) {
+            return res.status(400).json({
+                success: false,
+                message: 'El número de cuenta es requerido'
+            });
+        }
+
+        // Buscar la cuenta con la información del cliente asociado
+        const cuenta = await Cuenta.findOne({
+            where: { numero_cuenta },
+            include: [{
+                model: Cliente,
+                attributes: ['id', 'nombre', 'apellido', 'identificacion'] // Seleccionar los campos del cliente que quieres mostrar
+            }]
+        });
+
+        if (!cuenta) {
+            return res.status(404).json({
+                success: false,
+                message: 'Cuenta no encontrada'
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Detalle de cuenta obtenido exitosamente',
+            data: cuenta
+        });
+    } catch (error) {
+        console.error('Error al obtener el detalle de la cuenta: ', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Ocurrió un error'
+        });
+    }
+};

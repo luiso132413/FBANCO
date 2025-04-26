@@ -10,5 +10,7 @@ router.get('/api/cliete/all', cliente.getAllClientes);
 
 //rutas de las cuentas
 router.post('/api/cuenta/create', cuenta.crearCuenta);
+router.put('/api/cuenta/numerocuenta', cuenta.suspenderCuenta);
+router.get('/api/cuenta/numerocuenta', cuenta.obtenerDetalleCuenta);
 
 module.exports = router;
