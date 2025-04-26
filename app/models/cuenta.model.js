@@ -8,7 +8,7 @@ module.exports = (sequelize, Sequelize) => {
             primaryKey: true
         },
         numero_cuenta:{
-            type: Sequelize.STRING(20),
+            type: Sequelize.INTEGER,
             allowNull: false,
             unique: true
         },
@@ -29,18 +29,20 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.DATE,
             defaultValue: Sequelize.NOW 
         }
-
     },{
         tableName: 'cuentas'
     });
 
     Cuenta.generarNumeroCuenta = async function(){
-        const randomNum = Math.floor(10000000 + Math.random() * 90000000);
-        const numero_cuenta = `BAN-${randomNum}`;
+        const randomNum = Math.floor(10000000 + Math.random() * 90000000); // Genera un número de 8 dígitos
+        const numero_cuenta = randomNum.toString(); // Convertimos a string (sin interpolación)
     
-        const exists = await Cuenta.findOne({ where: { numero_cuenta: numero_cuenta } });
+        const exists = await Cuenta.findOne({ where: { numero_cuenta } });
 
-        return exists ? this.generarNumeroCuenta() : numero_cuenta;
+        if (exists) {
+            return this.generarNumeroCuenta(); // Si existe, generamos otro
+        }
+        return numero_cuenta; // Si no existe, retornamos este número
     };
 
     return Cuenta;
