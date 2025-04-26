@@ -32,10 +32,10 @@ db.sequelize = sequelize;
 db.Cliente = require('../models/cliente.model.js')(sequelize, Sequelize);
 db.Cuenta = require('../models/cuenta.model.js')(sequelize, Sequelize);
 
-/* Establecer relaciones
-db.Customer.hasMany(db.Account, { foreignKey: 'customer_id' });
-db.Account.belongsTo(db.Customer, { foreignKey: 'customer_id' });
-
+// Establecer relaciones
+db.Cliente.hasMany(db.Cuenta, { foreignKey: 'cliente_id' });
+db.Cuenta.belongsTo(db.Cliente, { foreignKey: 'cliente_id' });
+/*
 db.Account.hasMany(db.Transaction, { foreignKey: 'account_id' });
 db.Transaction.belongsTo(db.Account, { foreignKey: 'account_id' });*/
 
