@@ -56,3 +56,46 @@ exports.createCliente = async (req, res) => {
         });
     }
 };
+
+exports.getAllClientes = async (req, res) => {
+    try {
+        // Opciones para la consulta (puedes personalizar según necesidades)
+        const options = {
+            attributes: ['id', 'nombre', 'apellido', 'identificacion', 'email', 'telefono', 'direccion'],
+            order: [['apellido', 'ASC'], ['nombre', 'ASC']] // Ordenar por apellido y luego nombre
+        };
+
+        // Opcional: agregar paginación
+        if (req.query.page && req.query.limit) {
+            const page = parseInt(req.query.page);
+            const limit = parseInt(req.query.limit);
+            options.offset = (page - 1) * limit;
+            options.limit = limit;
+        }
+
+        const clientes = await Cliente.findAll(options);
+        
+        // Si no hay clientes
+        if (clientes.length === 0) {
+            return res.status(200).json({
+                success: true,
+                message: "No hay clientes registrados",
+                data: []
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Clientes obtenidos exitosamente",
+            data: clientes
+        });
+    } catch (error) {
+        console.error("Error en getAllClientes:", error);
+        
+        return res.status(500).json({
+            success: false,
+            message: "Error al obtener los clientes",
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Ocurrió un error'
+        });
+    }
+};
