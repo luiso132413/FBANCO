@@ -8,11 +8,11 @@ module.exports = (sequelize, Sequelize) =>{
         autoIncrement: true
     },
     nombre: {
-        type: Sequelize.STRING(20),
+        type: Sequelize.STRING(100),
         allowNull: false
     },
     apellido: {
-        type: Sequelize.STRING(20),
+        type: Sequelize.STRING(100),
         allowNull: false
     },
     identificacion: {
@@ -21,18 +21,18 @@ module.exports = (sequelize, Sequelize) =>{
         unique: true
     },
     email: {
-        type: Sequelize.STRING(20),
+        type: Sequelize.STRING(100),
         allowNull: false,
         validate: {
             isEmail: true
         }
     },
     telefono: {
-        type: Sequelize.STRING(10),
+        type: Sequelize.STRING(100),
         allowNull: false
     },
     direccion: {
-        type: Sequelize.STRING(30)
+        type: Sequelize.STRING(100)
     },
     creado: {
         type: Sequelize.DATE,
