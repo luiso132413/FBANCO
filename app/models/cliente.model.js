@@ -39,6 +39,8 @@ module.exports = (sequelize, Sequelize) =>{
         type: Sequelize.DATE,
         defaultValue: Sequelize.NOW
     }
+  },{
+    tableName: 'clientes'
   });
 
   return Cliente
