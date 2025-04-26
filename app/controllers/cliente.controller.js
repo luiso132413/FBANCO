@@ -1,30 +1,26 @@
-const db = require('../config/db.config');
-const Cliente = db.Cliente;
-
-const {validationResult} = require('express-validator');
-
 exports.createCliente = async (req, res) => {
-    let cliente = {};
+    try {
+        const cliente = {
+            nombre: req.body.nombre,
+            apellido: req.body.apellido,
+            identificacion: req.body.identificacion,
+            email: req.body.email,
+            telefono: req.body.telefono,
+            direccion: req.body.direccion
+        };
 
-    try{
-        cliente.nombre = req.body.nombre;
-        cliente.apellido =  req.body.apellido;
-        cliente.identificacion = req.body.identificacion;
-        cliente.email = req.body.email;
-        cliente.telefono = req.body.telefono;
-        cliente.direccion = req.body.direccion;
-
-
-        Cliente.createCliente(cliente).then(result => {
-            res.status(200).json({
-                messege: "El cliente se ha ingresado correctamente" + result.cliente_id,
-                cliente: result,
-            });
+        // Cambia esta línea:
+        const result = await Cliente.create(cliente); // Usa create() en lugar de createCliente()
+        
+        res.status(201).json({
+            message: "Cliente creado exitosamente",
+            cliente: result
         });
-    } catch (error){
+    } catch (error) {
+        console.error("Error al crear cliente:", error);
         res.status(500).json({
-            message: "Error!",
-            error: error.message,
+            message: "Error interno del servidor",
+            error: error.message
         });
     }
 }
