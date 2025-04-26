@@ -85,6 +85,8 @@ exports.suspenderCuenta = async (req, res) => {
     try {
         const { numero_cuenta } = req.params;
 
+        console.log("Recibido en endpoint:", numero_cuenta);
+
         // Validar que se proporcionó el número de cuenta
         if (!numero_cuenta) {
             return res.status(400).json({
