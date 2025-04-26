@@ -1,4 +1,4 @@
-const {password} = require('../config/env');
+const {password} = require('../config/env.js');
 
 module.exports = (sequelize, Sequelize) =>{
   const Cliente = sequelize.define('cliente', {
