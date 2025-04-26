@@ -1,3 +1,4 @@
+const { ConnectionAcquireTimeoutError } = require('sequelize');
 const db = require('../config/db.config.js');
 const Cliente = db.Cliente;
 
@@ -58,40 +59,16 @@ exports.createCliente = async (req, res) => {
 };
 
 exports.getAllClientes = (req, res) => {
-    // Opciones para la consulta
-    const options = {
-        attributes: ['id', 'nombre', 'apellido', 'identificacion', 'email', 'telefono', 'direccion'],
-        order: [['apellido', 'ASC'], ['nombre', 'ASC']]
-    };
-
-    // Opcional: agregar paginación
-    if (req.query.page && req.query.limit) {
-        const page = parseInt(req.query.page);
-        const limit = parseInt(req.query.limit);
-        options.offset = (page - 1) * limit;
-        options.limit = limit;
-    }
-
-    Cliente.findAll(options)
-        .then(clientes => {
-            if (clientes.length === 0) {
-                return res.status(200).json({
-                    message: "No hay clientes registrados",
-                    clientes: []
-                });
-            }
-
-            res.status(200).json({
-                message: "Clientes obtenidos exitosamente",
-                clientes: clientes
-            });
-        })
-        .catch(error => {
-            console.error("Error en getAllClientes:", error);
-            
-            res.status(500).json({
-                message: "Error al obtener los clientes",
-                error: process.env.NODE_ENV === 'development' ? error.message : 'Ocurrió un error'
-            });
+    Cliente.findAll().then(cliente => {
+        res.status(200).json({
+            message: "Clientes obtenidos exitosamente",
+            cliente: cliente,
         });
+    }).catch(error =>{
+        console.log(error);
+        res.status(500).json({
+            message: "Error!",
+            error: error,
+        });
+    });
 };
