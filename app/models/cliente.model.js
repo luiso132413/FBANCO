@@ -1,3 +1,4 @@
+//Funciona bien
 const {password} = require('../config/env.js');
 
 module.exports = (sequelize, Sequelize) =>{
