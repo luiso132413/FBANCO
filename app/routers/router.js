@@ -6,7 +6,7 @@ const cuenta = require('../controllers/cuenta.controller.js');
 
 //rutas del cliente
 router.post('/api/cliente/create', cliente.createCliente);
-router.get('/api/cliete/all', cliente.getAllClientes);
+router.get('/api/cliente/all', cliente.getAllClientes);
 
 //rutas de las cuentas
 router.post('/api/cuenta/create', cuenta.crearCuenta);
