@@ -1,3 +1,5 @@
+const db = require('../config/db.config.js');
+
 exports.createCliente = async (req, res) => {
     try {
         const cliente = {
