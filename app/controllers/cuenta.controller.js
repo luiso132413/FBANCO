@@ -83,7 +83,7 @@ exports.crearCuenta = async (req, res) => {
 
 exports.suspenderCuenta = async (req, res) => {
     try {
-        const { numero_cuenta } = req.params;
+        const { numero_cuenta } = req.body;
 
         console.log("Recibido en endpoint:", numero_cuenta);
 
@@ -135,7 +135,7 @@ exports.suspenderCuenta = async (req, res) => {
 
 exports.obtenerDetalleCuenta = async (req, res) => {
     try {
-        const { numero_cuenta } = req.params;
+        const { numero_cuenta } = req.body;
 
         // Validar que se proporcionó el número de cuenta
         if (!numero_cuenta) {
