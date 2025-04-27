@@ -31,6 +31,7 @@ db.sequelize = sequelize;
 // Importar modelos
 db.Cliente = require('../models/cliente.model.js')(sequelize, Sequelize);
 db.Cuenta = require('../models/cuenta.model.js')(sequelize, Sequelize);
+db.Transaccion = require('../models/transaccion.model.js')(sequelize, Sequelize);
 
 // Establecer relaciones
 db.Cliente.hasMany(db.Cuenta, { foreignKey: 'cliente_id' });
