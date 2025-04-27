@@ -150,7 +150,7 @@ exports.obtenerDetalleCuenta = async (req, res) => {
             where: { numero_cuenta },
             include: [{
                 model: Cliente,
-                attributes: ['id', 'nombre', 'apellido', 'identificacion']
+                attributes: ['cliente_id', 'nombre', 'apellido', 'identificacion','email','telefono','direccion']
             }]
         });
 
