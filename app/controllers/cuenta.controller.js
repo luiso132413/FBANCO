@@ -135,7 +135,7 @@ exports.suspenderCuenta = async (req, res) => {
 
 exports.obtenerDetalleCuenta = async (req, res) => {
     try {
-        const { numero_cuenta } = req.query;
+        const { numero_cuenta } = req.body; // Cambiado de req.query a req.body
 
         // Validar que se proporcionó el número de cuenta
         if (!numero_cuenta) {
@@ -150,7 +150,7 @@ exports.obtenerDetalleCuenta = async (req, res) => {
             where: { numero_cuenta },
             include: [{
                 model: Cliente,
-                attributes: ['id', 'nombre', 'apellido', 'identificacion'] // Seleccionar los campos del cliente que quieres mostrar
+                attributes: ['id', 'nombre', 'apellido', 'identificacion']
             }]
         });
 
