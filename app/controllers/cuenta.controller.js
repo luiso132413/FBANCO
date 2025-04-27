@@ -135,7 +135,7 @@ exports.suspenderCuenta = async (req, res) => {
 
 exports.obtenerDetalleCuenta = async (req, res) => {
     try {
-        const { numero_cuenta } = req.body;
+        const { numero_cuenta } = req.query;
 
         // Validar que se proporcionó el número de cuenta
         if (!numero_cuenta) {
