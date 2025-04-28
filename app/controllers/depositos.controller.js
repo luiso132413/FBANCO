@@ -26,7 +26,7 @@ exports.Depositos = async (req, res) => {
   }
 
   try{
-    const {cuenta_id, monto, descripcion} = req.body;
+    const {cuenta_id, monto, descripcion=''} = req.body;
 
     const cuenta = await Cuenta.findByPk(cuenta_id);
     
@@ -57,7 +57,7 @@ exports.Depositos = async (req, res) => {
     //crear la transaccion
     const transaccion = await Transaccion.create({
         cuenta_id,
-        tipo_tra,
+        tipo_tra: 'deposito',
         monto: parseFloat(monto),
         descripcion
     });
