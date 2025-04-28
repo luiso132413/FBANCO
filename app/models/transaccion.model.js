@@ -22,9 +22,6 @@ module.exports = (sequelize, Sequelize) => {
         descripcion: {
             type: Sequelize.STRING(50)
         },
-        cuenta_asociada: {
-            type: Sequelize.STRING(20)
-        },
         fecha_tra: {
             type: Sequelize.DATE,
             defaultValue: Sequelize.NOW

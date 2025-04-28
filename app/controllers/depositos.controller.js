@@ -26,7 +26,7 @@ exports.Depositos = async (req, res) => {
   }
 
   try{
-    const {cuenta_id, monto, descripcion, numero_cuenta} = req.body;
+    const {cuenta_id, monto, descripcion} = req.body;
 
     const cuenta = await Cuenta.findByPk(cuenta_id);
     
@@ -59,8 +59,7 @@ exports.Depositos = async (req, res) => {
         cuenta_id,
         tipo_tra,
         monto: parseFloat(monto),
-        descripcion,
-        numero_cuenta: cuenta.numero_cuenta
+        descripcion
     });
 
     cuenta.balance = parseFloat(cuenta.balance) + parseFloat(monto);
