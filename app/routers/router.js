@@ -17,5 +17,6 @@ router.get('/api/cuenta/detalle', cuenta.obtenerDetalleCuenta);
 //Rutas de depositos
 router.post('/api/transaccion/deposito', transaccion.Depositos);
 router.post('/api/transaccion/retirar', transaccion.Retiros);
+router.get('/api/transaccion/all', transaccion.AllTransancciones);
 
 module.exports = router;

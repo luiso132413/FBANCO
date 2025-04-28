@@ -200,3 +200,17 @@ exports.Retiros = async (req, res) => {
     });
   }
 };
+
+exports.AllTransancciones = async (req, res) => {
+  Transaccion.findAll().then(transaccion => {res.status(200).json({
+      message: "Transacciones obtenidas exitosamente!",
+      transaccion: transaccion,
+  });
+}).catch(error => {
+  console.log(error);
+  res.status(500).json({
+    message: "Error!",
+    error: error,
+  });
+});
+};
