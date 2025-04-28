@@ -36,8 +36,9 @@ db.Transaccion = require('../models/transaccion.model.js')(sequelize, Sequelize)
 // Establecer relaciones
 db.Cliente.hasMany(db.Cuenta, { foreignKey: 'cliente_id' });
 db.Cuenta.belongsTo(db.Cliente, { foreignKey: 'cliente_id' });
-/*
-db.Account.hasMany(db.Transaction, { foreignKey: 'account_id' });
-db.Transaction.belongsTo(db.Account, { foreignKey: 'account_id' });*/
+
+db.Cuenta.hasMany(db.Transaccion, {foreignKey: 'cuenta_id'});
+db.Transaccion.belongsTo(db.Cuenta, {foreignKey: 'cuenta_id'});
+
 
 module.exports = db;
