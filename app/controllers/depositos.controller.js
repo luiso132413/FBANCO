@@ -26,9 +26,9 @@ exports.Depositos = async (req, res) => {
   }
 
   try{
-    const {cuenta_id, monto, descripcion=''} = req.body;
+    const {numero_cuenta, monto, descripcion=''} = req.body;
 
-    const cuenta = await Cuenta.findByPk(cuenta_id);
+    const cuenta = await Cuenta.findByPk(numero_cuenta);
     
     //Verificar si la cuenta existe
     if(!cuenta){
@@ -56,7 +56,7 @@ exports.Depositos = async (req, res) => {
 
     //crear la transaccion
     const transaccion = await Transaccion.create({
-        cuenta_id,
+        numero_cuenta,
         tipo_tra: 'deposito',
         monto: parseFloat(monto),
         descripcion
@@ -120,9 +120,9 @@ exports.Retiros = async (req, res) => {
   }
 
   try {
-    const { cuenta_id, monto, descripcion = '' } = req.body;
+    const { numero_cuenta, monto, descripcion = '' } = req.body;
 
-    const cuenta = await Cuenta.findByPk(cuenta_id);
+    const cuenta = await Cuenta.findByPk(numero_cuenta);
     
     // Verificar si la cuenta existe
     if (!cuenta) {
@@ -158,7 +158,7 @@ exports.Retiros = async (req, res) => {
 
     // Crear la transacción de retiro
     const transaccion = await Transaccion.create({
-      cuenta_id,
+      numero_cuenta,
       tipo_tra: 'retiro',
       monto: parseFloat(monto),
       descripcion
