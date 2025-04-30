@@ -34,11 +34,11 @@ db.Cuenta = require('../models/cuenta.model.js')(sequelize, Sequelize);
 db.Transaccion = require('../models/transaccion.model.js')(sequelize, Sequelize);
 
 // Establecer relaciones
-db.Cliente.hasMany(db.Cuenta, { foreignKey: 'cliente_id' });
-db.Cuenta.belongsTo(db.Cliente, { foreignKey: 'cliente_id' });
+db.Cliente.hasMany(db.Cuenta, { foreignKey: 'identificacion' });
+db.Cuenta.belongsTo(db.Cliente, { foreignKey: 'identificacion' });
 
-db.Cuenta.hasMany(db.Transaccion, {foreignKey: 'cuenta_id'});
-db.Transaccion.belongsTo(db.Cuenta, {foreignKey: 'cuenta_id'});
+db.Cuenta.hasMany(db.Transaccion, {foreignKey: 'numero_cuenta'});
+db.Transaccion.belongsTo(db.Cuenta, {foreignKey: 'numero_cuenta'});
 
 
 module.exports = db;

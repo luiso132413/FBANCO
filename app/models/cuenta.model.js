@@ -9,6 +9,7 @@ module.exports = (sequelize, Sequelize) => {
         },
         numero_cuenta:{
             type: Sequelize.INTEGER,
+            primaryKey: true,
             allowNull: false,
             unique: true
         },

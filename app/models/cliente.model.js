@@ -18,6 +18,7 @@ module.exports = (sequelize, Sequelize) =>{
     },
     identificacion: {
         type: Sequelize.INTEGER,
+        primaryKey: true,
         allowNull: false,
         unique: true
     },
