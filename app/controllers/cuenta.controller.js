@@ -15,7 +15,7 @@ exports.crearCuenta = async (req, res) => {
         }
     }
 
-    // Validaciones personalizadas (si estás usando express-validator)
+    // Validaciones personalizadas
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({
@@ -28,20 +28,34 @@ exports.crearCuenta = async (req, res) => {
     try {
         const { identificacion, tipo_cuenta } = req.body;
 
-        // Verificamos que el cliente exista
-        const cliente = await Cliente.findByPk(identificacion);
-        if (!cliente) {
-            return res.status(404).json({
+        // Convertir identificación a número si es necesario
+        const identificacionNumero = Number(identificacion);
+        if (isNaN(identificacionNumero)) {
+            return res.status(400).json({
                 success: false,
-                message: 'Cliente no encontrado'
+                message: 'La identificación debe ser un número válido'
             });
         }
 
-        // Generación del número de cuenta (se asume que este método existe en el modelo)
+        // Verificar que el cliente exista usando findOne (más confiable que findByPk)
+        const cliente = await Cliente.findOne({
+            where: { identificacion: identificacionNumero }
+        });
+
+        if (!cliente) {
+            return res.status(404).json({
+                success: false,
+                message: 'Cliente no encontrado',
+                details: `No se encontró cliente con identificación: ${identificacionNumero}`
+            });
+        }
+
+        // Generación del número de cuenta
         const numero_cuenta = await Cuenta.generarNumeroCuenta();
 
+        // Crear la cuenta asegurando los tipos de datos
         const cuenta = await Cuenta.create({
-            identificacion,
+            identificacion: identificacionNumero,
             numero_cuenta,
             tipo_cuenta,
             balance: 0.00,
@@ -51,32 +65,50 @@ exports.crearCuenta = async (req, res) => {
         return res.status(201).json({
             success: true,
             message: 'Cuenta creada exitosamente',
-            data: cuenta
+            data: {
+                cuenta,
+                cliente: {
+                    nombre: cliente.nombre,
+                    apellido: cliente.apellido,
+                    identificacion: cliente.identificacion
+                }
+            }
         });
+
     } catch (error) {
-        console.error('Error al crear la cuenta: ', error);
+        console.error('Error detallado al crear cuenta:', {
+            message: error.message,
+            stack: error.stack,
+            ...(error.errors && { validationErrors: error.errors.map(e => e.message) })
+        });
 
         // Manejo específico de errores de Sequelize
         if (error.name === 'SequelizeUniqueConstraintError') {
             return res.status(400).json({
                 success: false,
                 message: 'Error de duplicación',
-                error: 'El número de cuenta ya existe'
+                details: error.errors.map(e => e.message)
             });
         }
 
         if (error.name === 'SequelizeValidationError') {
             return res.status(400).json({
                 success: false,
-                message: 'Error de validación',
-                errors: error.errors.map(e => e.message)
+                message: 'Error de validación de datos',
+                errors: error.errors.map(e => ({
+                    field: e.path,
+                    message: e.message
+                }))
             });
         }
 
         return res.status(500).json({
             success: false,
             message: 'Error interno del servidor',
-            error: process.env.NODE_ENV === 'development' ? error.message : 'Ocurrió un error'
+            ...(process.env.NODE_ENV === 'development' && {
+                error: error.message,
+                stack: error.stack
+            })
         });
     }
 };
