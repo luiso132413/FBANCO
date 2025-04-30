@@ -7,7 +7,7 @@ module.exports = (sequelize, Sequelize) => {
             primaryKey: true,
             autoIncrement: true
         },
-        cuenta_id: {
+        numero_cuenta: {
             type: Sequelize.INTEGER,
             allowNull: false
         },
