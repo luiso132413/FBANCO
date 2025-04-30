@@ -5,7 +5,7 @@ const { validationResult } = require('express-validator');
 
 exports.crearCuenta = async (req, res) => {
     // Validación de campos obligatorios
-    const requiredFields = ['cliente_id', 'tipo_cuenta'];
+    const requiredFields = ['identificacion', 'tipo_cuenta'];
     for (const field of requiredFields) {
         if (!req.body[field]) {
             return res.status(400).json({
@@ -26,10 +26,10 @@ exports.crearCuenta = async (req, res) => {
     }
 
     try {
-        const { cliente_id, tipo_cuenta } = req.body;
+        const { identificacion, tipo_cuenta } = req.body;
 
         // Verificamos que el cliente exista
-        const cliente = await Cliente.findByPk(cliente_id);
+        const cliente = await Cliente.findByPk(identificacion);
         if (!cliente) {
             return res.status(404).json({
                 success: false,
@@ -41,7 +41,7 @@ exports.crearCuenta = async (req, res) => {
         const numero_cuenta = await Cuenta.generarNumeroCuenta();
 
         const cuenta = await Cuenta.create({
-            cliente_id,
+            identificacion,
             numero_cuenta,
             tipo_cuenta,
             balance: 0.00,
