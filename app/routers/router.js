@@ -8,7 +8,7 @@ const transaccion = require('../controllers/depositos.controller.js');
 //rutas del cliente
 router.post('/api/cliente/create', cliente.createCliente);
 router.get('/api/cliente/all', cliente.getAllClientes);
-router.get('/api/cliente/buscar', cliente.buscarCliente);
+router.get('/api/cliente/buscar', express.json(), clienteController.buscarCliente);
 router.put('/api/cliente/actualizar', cliente.updateCliente);
 
 //rutas de las cuentas

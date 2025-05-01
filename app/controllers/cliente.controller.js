@@ -57,16 +57,23 @@ exports.createCliente = async (req, res) => {
     }
 };
 
-// Buscar un cliente por identificación
-// Buscar cliente por identificación (para la ruta /api/cliente/buscar)
+// Buscar cliente por identificación usando GET con body JSON
 exports.buscarCliente = async (req, res) => {
-    const { identificacion } = req.query; // Usamos query params en lugar de route params
-
-    // Validaciones
-    if (!identificacion) {
+    // Verificar si el body parser está configurado para GET
+    if (!req.body || Object.keys(req.body).length === 0) {
         return res.status(400).json({
             success: false,
-            message: "El parámetro 'identificacion' es requerido en la URL como query parameter"
+            message: "Debe enviar un JSON con el campo 'identificacion' en el cuerpo de la petición"
+        });
+    }
+
+    const { identificacion } = req.body;
+
+    // Validaciones
+    if (!identificacion && identificacion !== 0) {
+        return res.status(400).json({
+            success: false,
+            message: "El campo 'identificacion' es requerido en el cuerpo de la petición (JSON)"
         });
     }
 
@@ -82,7 +89,7 @@ exports.buscarCliente = async (req, res) => {
     try {
         const cliente = await Cliente.findOne({ 
             where: { identificacion: idNumber },
-            attributes: { exclude: ['createdAt', 'updatedAt'] } // Excluir campos de timestamp si existen
+            attributes: { exclude: ['createdAt', 'updatedAt'] }
         });
 
         if (!cliente) {
