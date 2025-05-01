@@ -115,80 +115,92 @@ exports.buscarCliente = async (req, res) => {
     }
 };
 
-// Actualizar un cliente
+// Actualizar un cliente por identificación
 exports.updateCliente = async (req, res) => {
     const { identificacion } = req.params;
 
+    // Validación básica del parámetro
     if (!identificacion) {
         return res.status(400).json({
             success: false,
-            message: "El parámetro 'id' es requerido"
+            message: "El parámetro 'identificacion' es requerido en la URL"
         });
     }
 
     try {
-        const clienteExistente = await Cliente.findByPk(identificacion);
-
+        // Verificar si el cliente existe
+        const clienteExistente = await Cliente.findOne({ where: { identificacion } });
+        
         if (!clienteExistente) {
             return res.status(404).json({
                 success: false,
-                message: "Cliente no encontrado"
+                message: `Cliente con identificación ${identificacion} no encontrado`
             });
         }
 
-        const datosActualizados = {
-            nombre: req.body.nombre?.substring(0, 20),
-            apellido: req.body.apellido?.substring(0, 20),
-            identificacion: req.body.identificacion,
-            email: req.body.email?.substring(0, 50),
-            telefono: req.body.telefono?.substring(0, 15),
-            direccion: req.body.direccion?.substring(0, 100)
-        };
-
-        Object.keys(datosActualizados).forEach(key => {
-            if (datosActualizados[key] === undefined) {
-                delete datosActualizados[key];
+        // Preparar datos para actualización
+        const camposPermitidos = ['nombre', 'apellido', 'email', 'telefono', 'direccion'];
+        const datosActualizados = {};
+        
+        // Filtrar y validar solo los campos permitidos
+        camposPermitidos.forEach(campo => {
+            if (req.body[campo] !== undefined) {
+                datosActualizados[campo] = req.body[campo]?.substring(0, 
+                    campo === 'nombre' || campo === 'apellido' ? 20 :
+                    campo === 'email' ? 50 :
+                    campo === 'telefono' ? 15 : 100);
             }
         });
 
+        // Validar que haya datos para actualizar
+        if (Object.keys(datosActualizados).length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "No se proporcionaron datos válidos para actualizar"
+            });
+        }
+
+        // Actualizar el cliente
         await Cliente.update(datosActualizados, {
             where: { identificacion }
         });
 
-        const clienteActualizado = await Cliente.findByPk(identificacion);
+        // Obtener el cliente actualizado
+        const clienteActualizado = await Cliente.findOne({ where: { identificacion } });
 
         return res.status(200).json({
             success: true,
             message: "Cliente actualizado exitosamente",
             data: clienteActualizado
         });
+
     } catch (error) {
         console.error("Error en updateCliente:", error);
 
+        // Manejo de errores específicos
         if (error.name === 'SequelizeUniqueConstraintError') {
             return res.status(400).json({
                 success: false,
                 message: "Error de duplicación",
-                error: "La identificación o email ya existen"
+                error: "El email ya está en uso por otro cliente"
             });
         }
 
         if (error.name === 'SequelizeValidationError') {
             return res.status(400).json({
                 success: false,
-                message: "Error de validación",
+                message: "Error de validación de datos",
                 errors: error.errors.map(e => e.message)
             });
         }
 
         return res.status(500).json({
             success: false,
-            message: "Error interno del servidor",
-            error: process.env.NODE_ENV === 'development' ? error.message : 'Ocurrió un error'
+            message: "Error interno del servidor al actualizar cliente",
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }
 };
-
 exports.getAllClientes = (req, res) => {
     Cliente.findAll().then(cliente => {
         res.status(200).json({
