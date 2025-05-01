@@ -59,29 +59,21 @@ exports.createCliente = async (req, res) => {
 
 // Buscar un cliente por identificación
 exports.BuscarCliente = (req, res) => {
-    let identificacion = req.params.identificacion;
+    let identificacionid = req.params.identificacion;
 
-    Cliente.findOne({ where: { identificacion } })
-        .then(cliente => {
-            if (!cliente) {
-                res.status(404).json({
-                    message: "Cliente no encontrado con identificación = " + identificacion,
-                });
-            } else {
-                res.status(200).json({
-                    message: "Cliente encontrado con identificación = " + identificacion,
-                    cliente: cliente,
-                });
-            }
-        })
-        .catch(error => {
-            console.log(error);
-            res.status(500).json({
-                message: "Error!",
-                error: error,
+    Cliente.findByPk(identificacionid).then(cliente => {
+        if(!cliente) {
+            res.status(404).json({
+                message: "Usuario no encontrado con la identificacion = " + identificacionid,
             });
-        });
-};
+        } else {
+            res.status(200).json({
+                message: "Usuario encontrado con identifiacion = " + identificacionid,
+                cliente: cliente,
+            });
+        }
+    })
+}
 // Actualizar un cliente
 exports.updateCliente = async (req, res) => {
     const { id } = req.params;
