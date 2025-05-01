@@ -58,42 +58,56 @@ exports.createCliente = async (req, res) => {
 };
 
 // Buscar un cliente por identificación
-exports.BuscarCliente = (req, res) => {
-    const { identificacion } = req.params;
+// Buscar cliente por identificación (para la ruta /api/cliente/buscar)
+exports.buscarCliente = async (req, res) => {
+    const { identificacion } = req.query; // Usamos query params en lugar de route params
 
+    // Validaciones
     if (!identificacion) {
         return res.status(400).json({
             success: false,
-            message: "El parámetro 'identificación' es requerido"
+            message: "El parámetro 'identificacion' es requerido en la URL como query parameter"
         });
     }
 
-    Cliente.findOne({ 
-        where: { identificacion: identificacion } 
-    })
-    .then(cliente => {
+    if (isNaN(identificacion)) {
+        return res.status(400).json({
+            success: false,
+            message: "La identificación debe ser un número válido"
+        });
+    }
+
+    const idNumber = parseInt(identificacion);
+
+    try {
+        const cliente = await Cliente.findOne({ 
+            where: { identificacion: idNumber },
+            attributes: { exclude: ['createdAt', 'updatedAt'] } // Excluir campos de timestamp si existen
+        });
+
         if (!cliente) {
             return res.status(404).json({
                 success: false,
-                message: `Cliente no encontrado con identificación: ${identificacion}`
+                message: `Cliente no encontrado con identificación: ${idNumber}`
             });
         }
-        
-        res.status(200).json({
+
+        return res.status(200).json({
             success: true,
-            message: `Cliente encontrado con identificación: ${identificacion}`,
+            message: "Cliente encontrado exitosamente",
             data: cliente
         });
-    })
-    .catch(error => {
-        console.error("Error en BuscarCliente:", error);
-        res.status(500).json({
+
+    } catch (error) {
+        console.error("Error en buscarCliente:", error);
+        return res.status(500).json({
             success: false,
-            message: "Error al buscar el cliente",
-            error: error.message
+            message: "Error interno del servidor al buscar cliente",
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
-    });
+    }
 };
+
 // Actualizar un cliente
 exports.updateCliente = async (req, res) => {
     const { id } = req.params;
