@@ -117,9 +117,9 @@ exports.buscarCliente = async (req, res) => {
 
 // Actualizar un cliente
 exports.updateCliente = async (req, res) => {
-    const { id } = req.params;
+    const { identificacion } = req.params;
 
-    if (!id) {
+    if (!identificacion) {
         return res.status(400).json({
             success: false,
             message: "El parámetro 'id' es requerido"
@@ -127,7 +127,7 @@ exports.updateCliente = async (req, res) => {
     }
 
     try {
-        const clienteExistente = await Cliente.findByPk(id);
+        const clienteExistente = await Cliente.findByPk(identificacion);
 
         if (!clienteExistente) {
             return res.status(404).json({
@@ -152,10 +152,10 @@ exports.updateCliente = async (req, res) => {
         });
 
         await Cliente.update(datosActualizados, {
-            where: { id }
+            where: { identificacion }
         });
 
-        const clienteActualizado = await Cliente.findByPk(id);
+        const clienteActualizado = await Cliente.findByPk(identificacion);
 
         return res.status(200).json({
             success: true,
