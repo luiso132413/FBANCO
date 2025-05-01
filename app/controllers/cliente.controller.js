@@ -58,44 +58,30 @@ exports.createCliente = async (req, res) => {
 };
 
 // Buscar un cliente por identificación
-exports.BuscarCliente = async (req, res) => {
-    const { identificacion } = req.params;
+exports.BuscarCliente = (req, res) => {
+    let identificacion = req.params.identificacion;
 
-    if (!identificacion) {
-        return res.status(400).json({
-            success: false,
-            message: "El parámetro 'identificacion' es requerido"
-        });
-    }
-
-    try {
-        const cliente = await Cliente.findOne({
-            where: { identificacion }
-        });
-
-        if (!cliente) {
-            return res.status(404).json({
-                success: false,
-                message: "Cliente no encontrado"
+    Cliente.findOne({ where: { identificacion } })
+        .then(cliente => {
+            if (!cliente) {
+                res.status(404).json({
+                    message: "Cliente no encontrado con identificación = " + identificacion,
+                });
+            } else {
+                res.status(200).json({
+                    message: "Cliente encontrado con identificación = " + identificacion,
+                    cliente: cliente,
+                });
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            res.status(500).json({
+                message: "Error!",
+                error: error,
             });
-        }
-
-        return res.status(200).json({
-            success: true,
-            message: "Cliente encontrado",
-            data: cliente
         });
-    } catch (error) {
-        console.error("Error en BuscarCliente:", error);
-
-        return res.status(500).json({
-            success: false,
-            message: "Error interno del servidor",
-            error: process.env.NODE_ENV === 'development' ? error.message : 'Ocurrió un error'
-        });
-    }
 };
-
 // Actualizar un cliente
 exports.updateCliente = async (req, res) => {
     const { id } = req.params;
