@@ -116,36 +116,46 @@ exports.buscarCliente = async (req, res) => {
 };
 
 // Actualizar un cliente por identificación
-exports.updateCliente = async (req, res) => {
-    const { identificacion } = req.params;
+// Actualizar un cliente con identificación en el body
+exports.actualizarCliente = async (req, res) => {
+    const { identificacion, ...datosActualizar } = req.body;
 
-    // Validación básica del parámetro
-    if (!identificacion) {
+    // Validación de la identificación
+    if (!identificacion && identificacion !== 0) {
         return res.status(400).json({
             success: false,
-            message: "El parámetro 'identificacion' es requerido en la URL"
+            message: "El campo 'identificacion' es requerido en el cuerpo de la petición"
         });
     }
 
+    if (isNaN(identificacion)) {
+        return res.status(400).json({
+            success: false,
+            message: "La identificación debe ser un número válido"
+        });
+    }
+
+    const idNumber = parseInt(identificacion);
+
     try {
         // Verificar si el cliente existe
-        const clienteExistente = await Cliente.findOne({ where: { identificacion } });
+        const clienteExistente = await Cliente.findOne({ where: { identificacion: idNumber } });
         
         if (!clienteExistente) {
             return res.status(404).json({
                 success: false,
-                message: `Cliente con identificación ${identificacion} no encontrado`
+                message: `Cliente con identificación ${idNumber} no encontrado`
             });
         }
 
-        // Preparar datos para actualización
+        // Campos permitidos para actualización (excluyendo identificacion)
         const camposPermitidos = ['nombre', 'apellido', 'email', 'telefono', 'direccion'];
         const datosActualizados = {};
         
-        // Filtrar y validar solo los campos permitidos
+        // Filtrar y validar los campos
         camposPermitidos.forEach(campo => {
-            if (req.body[campo] !== undefined) {
-                datosActualizados[campo] = req.body[campo]?.substring(0, 
+            if (datosActualizar[campo] !== undefined) {
+                datosActualizados[campo] = datosActualizar[campo]?.substring(0, 
                     campo === 'nombre' || campo === 'apellido' ? 20 :
                     campo === 'email' ? 50 :
                     campo === 'telefono' ? 15 : 100);
@@ -162,11 +172,11 @@ exports.updateCliente = async (req, res) => {
 
         // Actualizar el cliente
         await Cliente.update(datosActualizados, {
-            where: { identificacion }
+            where: { identificacion: idNumber }
         });
 
         // Obtener el cliente actualizado
-        const clienteActualizado = await Cliente.findOne({ where: { identificacion } });
+        const clienteActualizado = await Cliente.findOne({ where: { identificacion: idNumber } });
 
         return res.status(200).json({
             success: true,
@@ -175,7 +185,7 @@ exports.updateCliente = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error en updateCliente:", error);
+        console.error("Error en actualizarCliente:", error);
 
         // Manejo de errores específicos
         if (error.name === 'SequelizeUniqueConstraintError') {
@@ -200,7 +210,7 @@ exports.updateCliente = async (req, res) => {
             error: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }
-};
+}; 
 exports.getAllClientes = (req, res) => {
     Cliente.findAll().then(cliente => {
         res.status(200).json({
