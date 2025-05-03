@@ -24,7 +24,7 @@ exports.DepositoVoluminoso = async (req, res) => {
   }
 
   try {
-    const { numero_cuenta, monto, descripcion = '' } = req.body;
+    const { numero_cuenta, monto, descripcion = '', tipo_dep = 'Efectivo', cajero = 'Desconocido', n_autorizacion = null } = req.body;
 
     const cuenta = await Cuenta.findByPk(numero_cuenta);
 
@@ -49,46 +49,49 @@ exports.DepositoVoluminoso = async (req, res) => {
       });
     }
 
-    // Validación adicional: ¿es un depósito voluminoso?
-    const umbralVoluminoso = 10000; // Puedes cambiar este valor
+    const umbralVoluminoso = 10000;
     const esVoluminoso = parseFloat(monto) >= umbralVoluminoso;
 
-    // Crear transacción
-    const transaccion = await Transaccion.create({
+    // Registrar transacción general
+    await db.Transaccion.create({
       numero_cuenta,
-      tipo_tra: 'deposito_voluminoso',
-      monto: parseFloat(monto),
+      tipo_tra: 'Depósito',
+      monto,
       descripcion,
-      es_voluminoso: esVoluminoso // este campo debe existir en el modelo
+      fecha_transaccion: new Date()
     });
 
-    cuenta.balance = parseFloat(cuenta.balance) + parseFloat(monto);
-    await cuenta.save();
-
-    return res.status(201).json({
-      success: true,
-      message: 'Depósito voluminoso realizado con éxito',
-      data: transaccion
-    });
-
-  } catch (error) {
-    console.error('Error al realizar el depósito voluminoso:', error);
-
-    if (error.name === 'SequelizeValidationError') {
-      return res.status(400).json({
-        success: false,
-        message: 'Error de validación',
-        errors: error.errors.map(e => e.message)
+    // Si es voluminoso, registrarlo en la tabla Depto_Vol
+    if (esVoluminoso) {
+      await Voluminoso.create({
+        numero_cuenta,
+        tipo_dep,
+        monto,
+        cajero,
+        descripcion,
+        n_autorizacion,
+        fecha_depto: new Date()
       });
     }
 
-    return res.status(500).json({
+    res.status(200).json({
+      success: true,
+      message: esVoluminoso
+        ? 'Depósito voluminoso registrado con éxito'
+        : 'Depósito registrado con éxito',
+      voluminoso: esVoluminoso
+    });
+
+  } catch (error) {
+    console.error('Error al registrar depósito:', error);
+    res.status(500).json({
       success: false,
       message: 'Error interno del servidor',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Ocurrió un error'
+      error: error.message
     });
   }
 };
+
 
 exports.AllTransancciones = async (req, res) => {
   try {
