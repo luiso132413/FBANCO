@@ -31,7 +31,7 @@ module.exports = (sequelize, Sequelize) => {
             defaultValue: Sequelize.NOW
         }
     }, {
-        tableName: 'Depto_Vol'
+        tableName: 'voluminoso_'
     });
 
     return Voluminoso;
