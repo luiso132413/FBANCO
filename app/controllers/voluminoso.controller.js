@@ -4,7 +4,7 @@ const Cuenta = db.Cuenta;
 const { validationResult } = require('express-validator');
 
 exports.DepositoVoluminoso = async (req, res) => {
-  const requiredFields = ['monto'];
+  const requiredFields = ['numero_cuenta', 'monto', 'tipo_dep', 'cajero'];
   for (const field of requiredFields) {
     if (!req.body[field]) {
       return res.status(400).json({
@@ -14,6 +14,7 @@ exports.DepositoVoluminoso = async (req, res) => {
     }
   }
 
+  // Validaciones de express-validator
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({
@@ -24,17 +25,19 @@ exports.DepositoVoluminoso = async (req, res) => {
   }
 
   try {
-    const { numero_cuenta, monto, descripcion = '', tipo_dep = 'Efectivo', cajero = 'Desconocido', n_autorizacion = null } = req.body;
+    const { numero_cuenta, monto, tipo_dep, cajero, descripcion = '', n_autorizacion } = req.body;
 
     const cuenta = await Cuenta.findByPk(numero_cuenta);
 
+    // Verificar si la cuenta existe
     if (!cuenta) {
       return res.status(404).json({
         success: false,
-        message: 'Cuenta no encontrada'
+        message: 'La cuenta no existe'
       });
     }
 
+    // Validar que la cuenta esté activa
     if (cuenta.estado !== 'Activa') {
       return res.status(400).json({
         success: false,
@@ -42,6 +45,7 @@ exports.DepositoVoluminoso = async (req, res) => {
       });
     }
 
+    // Validar que el monto sea positivo
     if (parseFloat(monto) <= 0) {
       return res.status(400).json({
         success: false,
@@ -49,45 +53,41 @@ exports.DepositoVoluminoso = async (req, res) => {
       });
     }
 
-    const umbralVoluminoso = 10000;
-    const esVoluminoso = parseFloat(monto) >= umbralVoluminoso;
-
-    // Registrar transacción general
-    await db.Transaccion.create({
+    // Crear el depósito voluminoso
+    const deposito = await Voluminoso.create({
       numero_cuenta,
-      tipo_tra: 'Depósito',
-      monto,
+      monto: parseFloat(monto),
+      tipo_dep,
+      cajero,
       descripcion,
-      fecha_transaccion: new Date()
+      n_autorizacion
     });
 
-    // Si es voluminoso, registrarlo en la tabla Depto_Vol
-    if (esVoluminoso) {
-      await Voluminoso.create({
-        numero_cuenta,
-        tipo_dep,
-        monto,
-        cajero,
-        descripcion,
-        n_autorizacion,
-        fecha_depto: new Date()
-      });
-    }
+    // ✅ ACTUALIZAR BALANCE DE LA CUENTA
+    cuenta.balance = parseFloat(cuenta.balance) + parseFloat(monto);
+    await cuenta.save();
 
-    res.status(200).json({
+    return res.status(201).json({
       success: true,
-      message: esVoluminoso
-        ? 'Depósito voluminoso registrado con éxito'
-        : 'Depósito registrado con éxito',
-      voluminoso: esVoluminoso
+      message: 'Depósito voluminoso realizado con éxito',
+      data: deposito
     });
 
   } catch (error) {
-    console.error('Error al registrar depósito:', error);
-    res.status(500).json({
+    console.error('Error al realizar el depósito voluminoso:', error);
+
+    if (error.name === 'SequelizeValidationError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Error de validación',
+        errors: error.errors.map(e => e.message)
+      });
+    }
+
+    return res.status(500).json({
       success: false,
       message: 'Error interno del servidor',
-      error: error.message
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Ocurrió un error'
     });
   }
 };
