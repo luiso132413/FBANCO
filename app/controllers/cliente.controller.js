@@ -57,9 +57,9 @@ exports.createCliente = async (req, res) => {
     }
 };
 
-// Buscar cliente por identificación usando GET con body JSON
+// Buscar cliente por identificación usando POST con body JSON
 exports.buscarCliente = async (req, res) => {
-    // Verificar si el body parser está configurado para GET
+    // Verificar si se envió el cuerpo de la petición
     if (!req.body || Object.keys(req.body).length === 0) {
         return res.status(400).json({
             success: false,
@@ -73,7 +73,7 @@ exports.buscarCliente = async (req, res) => {
     if (!identificacion && identificacion !== 0) {
         return res.status(400).json({
             success: false,
-            message: "El campo 'identificacion' es requerido en el cuerpo de la petición (JSON)"
+            message: "El campo 'identificacion' es requerido en el cuerpo de la petición"
         });
     }
 
@@ -88,8 +88,8 @@ exports.buscarCliente = async (req, res) => {
 
     try {
         const cliente = await Cliente.findOne({ 
-            where: { identificacion: idNumber },
-            attributes: { exclude: ['createdAt', 'updatedAt'] }
+            where: { identificacion: idNumber }
+            // No excluimos ningún campo para mostrar toda la información
         });
 
         if (!cliente) {
@@ -114,7 +114,6 @@ exports.buscarCliente = async (req, res) => {
         });
     }
 };
-
 // Actualizar un cliente por identificación
 exports.updateCliente = async (req, res) => {
     try {
