@@ -8,10 +8,10 @@ const servicio = require('../controllers/servicio.controller.js');
 const voluminoso = require('../controllers/voluminoso.controller.js');
 
 //rutas del cliente
-router.post('/api/cliente/create', cliente.createCliente);
-router.get('/api/cliente/all', cliente.getAllClientes);
+router.post('/api/cliente/create', cliente.crearCliente);
+/*router.get('/api/cliente/all', cliente.getAllClientes);
 router.get('/api/cliente/buscar', express.json(), cliente.buscarCliente);
-router.put('/api/cliente/actualizar', express.json(), cliente.updateCliente);
+router.put('/api/cliente/actualizar', express.json(), cliente.updateCliente);*/
 
 //rutas de las cuentas
 router.post('/api/cuenta/create', cuenta.crearCuenta);
