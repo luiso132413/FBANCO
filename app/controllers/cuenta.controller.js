@@ -165,6 +165,64 @@ exports.suspenderCuenta = async (req, res) => {
     }
 };
 
+exports.activarCuenta = async (req, res) => {
+    try {
+        const { numero_cuenta } = req.body;
+
+        // Validar que se proporcionó el número de cuenta
+        if (!numero_cuenta) {
+            return res.status(400).json({
+                success: false,
+                message: 'El número de cuenta es requerido'
+            });
+        }
+
+        // Buscar la cuenta
+        const cuenta = await Cuenta.findOne({
+            where: { numero_cuenta }
+        });
+
+        if (!cuenta) {
+            return res.status(404).json({
+                success: false,
+                message: 'Cuenta no encontrada'
+            });
+        }
+
+        // Verificar si la cuenta ya está activa
+        if (cuenta.estado === 'Activa') {
+            return res.status(400).json({
+                success: false,
+                message: 'La cuenta ya está activa'
+            });
+        }
+
+        // Actualizar el estado de la cuenta
+        await cuenta.update({ estado: 'Activa' });
+
+        return res.status(200).json({
+            success: true,
+            message: 'Cuenta activada exitosamente',
+            data: cuenta
+        });
+    } catch (error) {
+        console.error('Error al activar la cuenta: ', {
+            message: error.message,
+            stack: error.stack,
+            ...(error.errors && { validationErrors: error.errors.map(e => e.message) })
+        });
+
+        return res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor',
+            ...(process.env.NODE_ENV === 'development' && {
+                error: error.message,
+                stack: error.stack
+            })
+        });
+    }
+};
+
 exports.obtenerDetalleCuenta = async (req, res) => {
     try {
         const { numero_cuenta } = req.body; // Cambiado de req.query a req.body

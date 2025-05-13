@@ -16,6 +16,7 @@ router.put('/api/cliente/actualizar', express.json(), cliente.updateCliente);
 //rutas de las cuentas
 router.post('/api/cuenta/create', cuenta.crearCuenta);
 router.put('/api/cuenta/suspender', cuenta.suspenderCuenta);
+router.put('/api/cuenta/activar', cuenta.activarCuenta);
 router.get('/api/cuenta/detalle', cuenta.obtenerDetalleCuenta);
 
 //Rutas de depositos
