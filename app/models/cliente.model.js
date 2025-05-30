@@ -36,7 +36,7 @@ module.exports = (sequelize, Sequelize) => {
     }
   }, {
     tableName: 'clientes',
-    timestamps: false // Desactiva los campos createdAt y updatedAt
+    timestamps: false 
   });
 
   return Cliente;

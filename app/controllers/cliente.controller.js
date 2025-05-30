@@ -2,7 +2,6 @@ const { ConnectionAcquireTimeoutError } = require('sequelize');
 const db = require('../config/db.config.js');
 const Cliente = db.Cliente;
 
-// Crear un nuevo cliente
 exports.createCliente = async (req, res) => {
     const requiredFields = ['nombre', 'apellido', 'identificacion', 'email', 'telefono'];
     for (const field of requiredFields) {
@@ -57,9 +56,7 @@ exports.createCliente = async (req, res) => {
     }
 };
 
-// Buscar cliente por identificación usando POST con body JSON
 exports.buscarCliente = async (req, res) => {
-    // Verificar si se envió el cuerpo de la petición
     if (!req.body || Object.keys(req.body).length === 0) {
         return res.status(400).json({
             success: false,
@@ -69,7 +66,6 @@ exports.buscarCliente = async (req, res) => {
 
     const { identificacion } = req.body;
 
-    // Validaciones
     if (!identificacion && identificacion !== 0) {
         return res.status(400).json({
             success: false,
@@ -89,7 +85,6 @@ exports.buscarCliente = async (req, res) => {
     try {
         const cliente = await Cliente.findOne({ 
             where: { identificacion: idNumber }
-            // No excluimos ningún campo para mostrar toda la información
         });
 
         if (!cliente) {
@@ -114,10 +109,8 @@ exports.buscarCliente = async (req, res) => {
         });
     }
 };
-// Actualizar un cliente por identificación
 exports.updateCliente = async (req, res) => {
     try {
-        // Obtener identificación del body en lugar de params
         const { identificacion } = req.body;
 
         if (!identificacion) {
@@ -127,7 +120,6 @@ exports.updateCliente = async (req, res) => {
             });
         }
 
-        // Buscar cliente existente
         const clienteExistente = await Cliente.findOne({ where: { identificacion } });
         if (!clienteExistente) {
             return res.status(404).json({
@@ -136,7 +128,6 @@ exports.updateCliente = async (req, res) => {
             });
         }
 
-        // Preparar datos para actualizar
         const datosActualizados = {
             nombre: req.body.nombre?.substring(0, 20) || clienteExistente.nombre,
             apellido: req.body.apellido?.substring(0, 20) || clienteExistente.apellido,
@@ -145,7 +136,6 @@ exports.updateCliente = async (req, res) => {
             direccion: req.body.direccion?.substring(0, 100) || clienteExistente.direccion
         };
 
-        // Validar campos requeridos
         const requiredFields = ['nombre', 'apellido', 'email', 'telefono'];
         for (const field of requiredFields) {
             if (!datosActualizados[field]) {
@@ -156,7 +146,6 @@ exports.updateCliente = async (req, res) => {
             }
         }
 
-        // Actualizar cliente
         await clienteExistente.update(datosActualizados);
 
         return res.status(200).json({
@@ -167,7 +156,6 @@ exports.updateCliente = async (req, res) => {
 
     } catch (error) {
         console.error("Error en updateCliente:", error);
-        // Manejo de errores (igual que antes)
     }
 }; 
 

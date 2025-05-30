@@ -4,7 +4,6 @@ const Cliente = db.Cliente;
 const { validationResult } = require('express-validator');
 
 exports.crearCuenta = async (req, res) => {
-    // Validación de campos obligatorios
     const requiredFields = ['identificacion', 'tipo_cuenta'];
     for (const field of requiredFields) {
         if (!req.body[field]) {
@@ -15,7 +14,6 @@ exports.crearCuenta = async (req, res) => {
         }
     }
 
-    // Validaciones personalizadas
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({
@@ -28,7 +26,6 @@ exports.crearCuenta = async (req, res) => {
     try {
         const { identificacion, tipo_cuenta } = req.body;
 
-        // Convertir identificación a número si es necesario
         const identificacionNumero = Number(identificacion);
         if (isNaN(identificacionNumero)) {
             return res.status(400).json({
@@ -37,7 +34,6 @@ exports.crearCuenta = async (req, res) => {
             });
         }
 
-        // Verificar que el cliente exista usando findOne (más confiable que findByPk)
         const cliente = await Cliente.findOne({
             where: { identificacion: identificacionNumero }
         });
@@ -50,10 +46,8 @@ exports.crearCuenta = async (req, res) => {
             });
         }
 
-        // Generación del número de cuenta
         const numero_cuenta = await Cuenta.generarNumeroCuenta();
 
-        // Crear la cuenta asegurando los tipos de datos
         const cuenta = await Cuenta.create({
             identificacion: identificacionNumero,
             numero_cuenta,
@@ -82,7 +76,6 @@ exports.crearCuenta = async (req, res) => {
             ...(error.errors && { validationErrors: error.errors.map(e => e.message) })
         });
 
-        // Manejo específico de errores de Sequelize
         if (error.name === 'SequelizeUniqueConstraintError') {
             return res.status(400).json({
                 success: false,
@@ -119,7 +112,6 @@ exports.suspenderCuenta = async (req, res) => {
 
         console.log("Recibido en endpoint:", numero_cuenta);
 
-        // Validar que se proporcionó el número de cuenta
         if (!numero_cuenta) {
             return res.status(400).json({
                 success: false,
@@ -127,7 +119,6 @@ exports.suspenderCuenta = async (req, res) => {
             });
         }
 
-        // Buscar la cuenta
         const cuenta = await Cuenta.findOne({
             where: { numero_cuenta }
         });
@@ -139,7 +130,6 @@ exports.suspenderCuenta = async (req, res) => {
             });
         }
 
-        // Verificar si la cuenta ya está suspendida
         if (cuenta.estado === 'Suspendida') {
             return res.status(400).json({
                 success: false,
@@ -147,7 +137,6 @@ exports.suspenderCuenta = async (req, res) => {
             });
         }
 
-        // Actualizar el estado de la cuenta
         await cuenta.update({ estado: 'Suspendida' });
 
         return res.status(200).json({
@@ -169,7 +158,6 @@ exports.activarCuenta = async (req, res) => {
     try {
         const { numero_cuenta } = req.body;
 
-        // Validar que se proporcionó el número de cuenta
         if (!numero_cuenta) {
             return res.status(400).json({
                 success: false,
@@ -177,7 +165,6 @@ exports.activarCuenta = async (req, res) => {
             });
         }
 
-        // Buscar la cuenta
         const cuenta = await Cuenta.findOne({
             where: { numero_cuenta }
         });
@@ -189,7 +176,6 @@ exports.activarCuenta = async (req, res) => {
             });
         }
 
-        // Verificar si la cuenta ya está activa
         if (cuenta.estado === 'Activa') {
             return res.status(400).json({
                 success: false,
@@ -197,7 +183,6 @@ exports.activarCuenta = async (req, res) => {
             });
         }
 
-        // Actualizar el estado de la cuenta
         await cuenta.update({ estado: 'Activa' });
 
         return res.status(200).json({
@@ -225,9 +210,8 @@ exports.activarCuenta = async (req, res) => {
 
 exports.obtenerDetalleCuenta = async (req, res) => {
     try {
-        const { numero_cuenta } = req.body; // Cambiado de req.query a req.body
+        const { numero_cuenta } = req.body; 
 
-        // Validar que se proporcionó el número de cuenta
         if (!numero_cuenta) {
             return res.status(400).json({
                 success: false,
@@ -235,7 +219,6 @@ exports.obtenerDetalleCuenta = async (req, res) => {
             });
         }
 
-        // Buscar la cuenta con la información del cliente asociado
         const cuenta = await Cuenta.findOne({
             where: { numero_cuenta },
             include: [{

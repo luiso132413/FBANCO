@@ -28,7 +28,6 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
-// Importar modelos
 db.Cliente = require('../models/cliente.model.js')(sequelize, Sequelize);
 db.Cuenta = require('../models/cuenta.model.js')(sequelize, Sequelize);
 db.Transaccion = require('../models/transaccion.model.js')(sequelize, Sequelize);

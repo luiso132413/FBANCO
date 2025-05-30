@@ -4,7 +4,6 @@ const Cuenta = db.Cuenta;
 const { validationResult } = require('express-validator');
 
 exports.Depositos = async (req, res) => {
-  //Validacion de campos obligatorios
   const requiredFields = ['monto'];
   for (const field of requiredFields) {
     if (!req.body[field]){
@@ -15,7 +14,6 @@ exports.Depositos = async (req, res) => {
     }
   }
 
-  // Validaciones de express-validator
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
       return res.status(400).json({
@@ -30,7 +28,6 @@ exports.Depositos = async (req, res) => {
 
     const cuenta = await Cuenta.findByPk(numero_cuenta);
     
-    //Verificar si la cuenta existe
     if(!cuenta){
       return res.status(404).json({
         success: false,
@@ -38,7 +35,6 @@ exports.Depositos = async (req, res) => {
       })
     }
 
-    //Validar que la cuenta este activa
     if(cuenta.estado !== 'Activa'){
       return res.status(400).json({
         success: false,
@@ -46,7 +42,6 @@ exports.Depositos = async (req, res) => {
       });
     }
     
-    //Validar que el monto sea positivo
     if(parseFloat(monto)<=0){
       return res.status(400).json({
         success: false,
@@ -54,7 +49,6 @@ exports.Depositos = async (req, res) => {
       });
     }
 
-    //crear la transaccion
     const transaccion = await Transaccion.create({
         numero_cuenta,
         tipo_tra: 'deposito',
@@ -72,33 +66,31 @@ exports.Depositos = async (req, res) => {
     });
   } catch (error){
     console.error('Error al crear la transaccion: ',error);
-    // Manejo específico de errores de Sequelize
     if (error.name === 'SequelizeUniqueConstraintError') {
       return res.status(400).json({
           success: false,
           message: 'Error de duplicación',
           error: error.message
       });
-  }
+    }
 
-  if (error.name === 'SequelizeValidationError') {
+    if (error.name === 'SequelizeValidationError') {
       return res.status(400).json({
           success: false,
           message: 'Error de validación',
           errors: error.errors.map(e => e.message)
       });
-  }
+    }
 
-  return res.status(500).json({
-      success: false,
-      message: 'Error interno del servidor',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Ocurrió un error'
-  });
+    return res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: process.env.NODE_ENV === 'development' ? error.message : 'Ocurrió un error'
+    });
   }
 };
 
 exports.Retiros = async (req, res) => {
-  // Validación de campos obligatorios
   const requiredFields = ['monto'];
   for (const field of requiredFields) {
     if (!req.body[field]) {
@@ -109,7 +101,6 @@ exports.Retiros = async (req, res) => {
     }
   }
 
-  // Validaciones de express-validator
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({
@@ -124,7 +115,6 @@ exports.Retiros = async (req, res) => {
 
     const cuenta = await Cuenta.findByPk(numero_cuenta);
     
-    // Verificar si la cuenta existe
     if (!cuenta) {
       return res.status(404).json({
         success: false,
@@ -132,7 +122,6 @@ exports.Retiros = async (req, res) => {
       });
     }
 
-    // Validar que la cuenta este activa
     if (cuenta.estado !== 'Activa') {
       return res.status(400).json({
         success: false,
@@ -140,7 +129,6 @@ exports.Retiros = async (req, res) => {
       });
     }
     
-    // Validar que el monto sea positivo
     if (parseFloat(monto) <= 0) {
       return res.status(400).json({
         success: false,
@@ -148,7 +136,6 @@ exports.Retiros = async (req, res) => {
       });
     }
 
-    // Validar que haya suficiente saldo
     if (parseFloat(cuenta.balance) < parseFloat(monto)) {
       return res.status(400).json({
         success: false,
@@ -156,7 +143,6 @@ exports.Retiros = async (req, res) => {
       });
     }
 
-    // Crear la transacción de retiro
     const transaccion = await Transaccion.create({
       numero_cuenta,
       tipo_tra: 'retiro',
@@ -164,7 +150,6 @@ exports.Retiros = async (req, res) => {
       descripcion
     });
 
-    // Actualizar el balance de la cuenta
     cuenta.balance = parseFloat(cuenta.balance) - parseFloat(monto);
     await cuenta.save();
 
@@ -176,7 +161,6 @@ exports.Retiros = async (req, res) => {
   } catch (error) {
     console.error('Error al crear la transacción de retiro: ', error);
     
-    // Manejo específico de errores de Sequelize
     if (error.name === 'SequelizeUniqueConstraintError') {
       return res.status(400).json({
         success: false,
@@ -202,15 +186,16 @@ exports.Retiros = async (req, res) => {
 };
 
 exports.AllTransancciones = async (req, res) => {
-  Transaccion.findAll().then(transaccion => {res.status(200).json({
+  Transaccion.findAll().then(transaccion => {
+    res.status(200).json({
       message: "Transacciones obtenidas exitosamente!",
       transaccion: transaccion,
+    });
+  }).catch(error => {
+    console.log(error);
+    res.status(500).json({
+      message: "Error!",
+      error: error,
+    });
   });
-}).catch(error => {
-  console.log(error);
-  res.status(500).json({
-    message: "Error!",
-    error: error,
-  });
-});
 };

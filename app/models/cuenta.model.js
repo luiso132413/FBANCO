@@ -34,17 +34,14 @@ module.exports = (sequelize, Sequelize) => {
     });
 
     Cuenta.generarNumeroCuenta = async function() {
-        // Buscamos la cuenta con el número más alto
         const lastAccount = await Cuenta.findOne({
             order: [['numero_cuenta', 'DESC']],
             attributes: ['numero_cuenta']
         });
         
-        // Si no hay cuentas, empezamos con 1
         let nextNumber = 1;
         
         if (lastAccount) {
-            // Si hay cuentas, tomamos el último número y le sumamos 1
             nextNumber = lastAccount.numero_cuenta + 1;
         }
         

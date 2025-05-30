@@ -14,7 +14,6 @@ exports.DepositoVoluminoso = async (req, res) => {
     }
   }
 
-  // Validaciones de express-validator
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({
@@ -29,7 +28,6 @@ exports.DepositoVoluminoso = async (req, res) => {
 
     const cuenta = await Cuenta.findByPk(numero_cuenta);
 
-    // Verificar si la cuenta existe
     if (!cuenta) {
       return res.status(404).json({
         success: false,
@@ -37,7 +35,6 @@ exports.DepositoVoluminoso = async (req, res) => {
       });
     }
 
-    // Validar que la cuenta esté activa
     if (cuenta.estado !== 'Activa') {
       return res.status(400).json({
         success: false,
@@ -45,7 +42,6 @@ exports.DepositoVoluminoso = async (req, res) => {
       });
     }
 
-    // Validar que el monto sea positivo
     if (parseFloat(monto) <= 0) {
       return res.status(400).json({
         success: false,
@@ -53,7 +49,6 @@ exports.DepositoVoluminoso = async (req, res) => {
       });
     }
 
-    // Crear el depósito voluminoso
     const deposito = await Voluminoso.create({
       numero_cuenta,
       monto: parseFloat(monto),
@@ -63,7 +58,6 @@ exports.DepositoVoluminoso = async (req, res) => {
       n_autorizacion
     });
 
-    // ✅ ACTUALIZAR BALANCE DE LA CUENTA
     cuenta.balance = parseFloat(cuenta.balance) + parseFloat(monto);
     await cuenta.save();
 
@@ -79,32 +73,18 @@ exports.DepositoVoluminoso = async (req, res) => {
     if (error.name === 'SequelizeValidationError') {
       return res.status(400).json({
         success: false,
-        message: 'Error de validación',
-        errors: error.errors.map(e => e.message)
+        message: 'Error de validación de Sequelize',
+        errors: error.errors.map(err => ({
+          field: err.path,
+          message: err.message
+        }))
       });
     }
 
     return res.status(500).json({
       success: false,
       message: 'Error interno del servidor',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Ocurrió un error'
-    });
-  }
-};
-
-
-exports.AllTransancciones = async (req, res) => {
-  try {
-    const transacciones = await Voluminoso.findAll();
-    res.status(200).json({
-      success: true,
-      data: transacciones
-    });
-  } catch (error) {
-    console.error('Error al obtener las transacciones voluminosas:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error al obtener las transacciones'
+      error: error.message
     });
   }
 };
